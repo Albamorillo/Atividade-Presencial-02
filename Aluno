@@ -1,0 +1,47 @@
+package org.example;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Aluno {
+    private Connection connection;
+
+    public Aluno(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void save(@org.jetbrains.annotations.NotNull Aluno aluno) throws SQLException {
+        String sql = "INSERT INTO Aluno (nome, disciplina, nota)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, aluno.getNome());
+            stmt.setString(2, aluno.getDisciplina());
+            stmt.setString(3, aluno.getNota());
+            stmt.executeUpdate();
+
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                aluno.setId(generatedKeys.getInt(1));
+            }
+        }
+    }
+
+    private void setId(int anInt) {
+    }
+
+    public List<aluno> findAll() throws SQLException {
+        List<aluno> alunos = new ArrayList<>();
+        String sql = "SELECT * FROM Aluno";
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Aluno aluno = new Aluno();
+                aluno.setId(rs.getInt("id"));
+                aluno.setNome(rs.getString("nome"));
+                aluno.setDisciplina(rs.getString("disciplina"));
+                alunos.add(aluno);
+            }
+        }
+        return alunos;
+    }
+}
